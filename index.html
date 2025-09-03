@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard 4 All - Renforcer la cybersécurité en Afrique</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>CyberGuard 4 All</span>
+                </div>
+                <ul class="nav-menu" id="nav-menu">
+                    <li class="nav-item">
+                        <a href="#home" class="nav-link active">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#survey" class="nav-link">Enquête</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#information" class="nav-link">Informations</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#admin" class="nav-link">Admin</a>
+                    </li>
+                </ul>
+                <div class="nav-toggle" id="nav-toggle">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Home Section -->
+        <section id="home" class="section active">
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-content">
+                        <h1 class="hero-title">
+                            Renforcer la <span class="highlight">Cybersécurité</span> en Afrique
+                        </h1>
+                        <p class="hero-subtitle">
+                            Collectons ensemble des données pour améliorer la sécurité numérique 
+                            et protéger les organisations africaines contre les cybermenaces.
+                        </p>
+                        <div class="hero-actions">
+                            <a href="#survey" class="btn btn-primary">
+                                <i class="fas fa-clipboard-list"></i>
+                                Participer à l'enquête
+                            </a>
+                            <a href="#information" class="btn btn-secondary">
+                                <i class="fas fa-info-circle"></i>
+                                En savoir plus
+                            </a>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <i class="fas fa-shield-alt hero-icon"></i>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <h2 class="section-title">Pourquoi participer ?</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3>Analyser les tendances</h3>
+                            <p>Comprendre l'état actuel de la cybersécurité en Afrique</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <h3>Partager l'expertise</h3>
+                            <p>Contribuer à l'amélioration collective de la sécurité</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3>Former les équipes</h3>
+                            <p>Identifier les besoins en formation et support</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Survey Section -->
+        <section id="survey" class="section">
+            <div class="container">
+                <div class="survey-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        Enquête CyberGuard 4 All
+                    </h1>
+                    <p class="section-subtitle">
+                        Aidez-nous à améliorer la cybersécurité en Afrique
+                    </p>
+                </div>
+
+                <div class="survey-container">
+                    <div class="progress-bar">
+                        <div class="progress-step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Informations générales</span>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Sensibilisation</span>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Incidents & Besoins</span>
+                        </div>
+                        <div class="progress-step" data-step="4">
+                            <span class="step-number">4</span>
+                            <span class="step-label">Commentaires</span>
+                        </div>
+                    </div>
+
+                    <form id="survey-form" class="survey-form">
+                        <!-- Step 1: General Information -->
+                        <div class="form-step active" data-step="1">
+                            <h3>Informations générales</h3>
+                            
+                            <div class="form-group">
+                                <label for="region">Région *</label>
+                                <select id="region" name="region" required>
+                                    <option value="">Sélectionnez une région</option>
+                                    <option value="Afrique du Nord">Afrique du Nord</option>
+                                    <option value="Afrique de l'Ouest">Afrique de l'Ouest</option>
+                                    <option value="Afrique centrale">Afrique centrale</option>
+                                    <option value="Afrique de l'Est">Afrique de l'Est</option>
+                                    <option value="Afrique australe">Afrique australe</option>
+                                    <option value="Autre">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="country">Pays *</label>
+                                <input type="text" id="country" name="country" required 
+                                       placeholder="Ex: Sénégal, Maroc, Kenya...">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="organizationType">Type d'organisation *</label>
+                                <select id="organizationType" name="organizationType" required>
+                                    <option value="">Sélectionnez un type</option>
+                                    <option value="Entreprise">Entreprise</option>
+                                    <option value="ONG">ONG</option>
+                                    <option value="École">École</option>
+                                    <option value="Particulier">Particulier</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="organizationSize">Taille de l'organisation *</label>
+                                <select id="organizationSize" name="organizationSize" required>
+                                    <option value="">Sélectionnez une taille</option>
+                                    <option value="1-10">1-10 employés</option>
+                                    <option value="11-50">11-50 employés</option>
+                                    <option value="51-200">51-200 employés</option>
+                                    <option value="201-1000">201-1000 employés</option>
+                                    <option value="1000+">1000+ employés</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Awareness and Solutions -->
+                        <div class="form-step" data-step="2">
+                            <h3>Niveau de sensibilisation et solutions</h3>
+                            
+                            <div class="form-group">
+                                <label>Niveau de sensibilisation à la cybersécurité (1-5) *</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="cybersecurityAwareness" value="1" required>
+                                        <span>1</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="cybersecurityAwareness" value="2" required>
+                                        <span>2</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="cybersecurityAwareness" value="3" required>
+                                        <span>3</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="cybersecurityAwareness" value="4" required>
+                                        <span>4</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="cybersecurityAwareness" value="5" required>
+                                        <span>5</span>
+                                    </label>
+                                </div>
+                                <small>1 = Très faible, 5 = Très élevé</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Solutions de cybersécurité utilisées *</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Antivirus">
+                                        <span>Antivirus</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Firewall">
+                                        <span>Firewall</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="VPN">
+                                        <span>VPN</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Chiffrement">
+                                        <span>Chiffrement</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Authentification à deux facteurs">
+                                        <span>Authentification à deux facteurs</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Sauvegarde cloud">
+                                        <span>Sauvegarde cloud</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Formation employés">
+                                        <span>Formation employés</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Audit sécurité">
+                                        <span>Audit sécurité</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="solutionsUsed" value="Aucune">
+                                        <span>Aucune</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Incidents and Needs -->
+                        <div class="form-step" data-step="3">
+                            <h3>Incidents et besoins</h3>
+                            
+                            <div class="form-group">
+                                <label for="incidentsLast12Months">
+                                    Nombre d'incidents de cybersécurité subis au cours des 12 derniers mois *
+                                </label>
+                                <input type="number" id="incidentsLast12Months" name="incidentsLast12Months" 
+                                       min="0" max="100" required placeholder="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Besoins en formation *</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Formation de base cybersécurité">
+                                        <span>Formation de base cybersécurité</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Gestion des mots de passe">
+                                        <span>Gestion des mots de passe</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Détection des menaces">
+                                        <span>Détection des menaces</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Réponse aux incidents">
+                                        <span>Réponse aux incidents</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Conformité réglementaire">
+                                        <span>Conformité réglementaire</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Sécurité des données">
+                                        <span>Sécurité des données</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="trainingNeeds" value="Aucun besoin">
+                                        <span>Aucun besoin</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Besoins en support *</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Support technique">
+                                        <span>Support technique</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Audit de sécurité">
+                                        <span>Audit de sécurité</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Conseil stratégique">
+                                        <span>Conseil stratégique</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Formation personnalisée">
+                                        <span>Formation personnalisée</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Outils de sécurité">
+                                        <span>Outils de sécurité</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="supportNeeds" value="Aucun besoin">
+                                        <span>Aucun besoin</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Comments -->
+                        <div class="form-step" data-step="4">
+                            <h3>Commentaires et soumission</h3>
+                            
+                            <div class="form-group">
+                                <label for="additionalComments">Commentaires additionnels (optionnel)</label>
+                                <textarea id="additionalComments" name="additionalComments" 
+                                          placeholder="Partagez vos expériences, suggestions ou préoccupations..."
+                                          maxlength="1000" rows="4"></textarea>
+                                <small>Maximum 1000 caractères</small>
+                            </div>
+
+                            <div class="privacy-notice">
+                                <i class="fas fa-shield-alt"></i>
+                                <div>
+                                    <h4>Confidentialité</h4>
+                                    <p>Vos données sont collectées de manière anonyme et sécurisée. 
+                                    Elles ne seront utilisées que pour améliorer la cybersécurité en Afrique.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-secondary" id="prev-btn" style="display: none;">
+                                <i class="fas fa-arrow-left"></i>
+                                Précédent
+                            </button>
+                            <button type="button" class="btn btn-primary" id="next-btn">
+                                Suivant
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button type="submit" class="btn btn-success" id="submit-btn" style="display: none;">
+                                <i class="fas fa-check"></i>
+                                Soumettre l'enquête
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Information Section -->
+        <section id="information" class="section">
+            <div class="container">
+                <h1 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Informations et Ressources
+                </h1>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>Bonnes pratiques de cybersécurité</h3>
+                        <ul>
+                            <li>Utilisez des mots de passe forts et uniques</li>
+                            <li>Activez l'authentification à deux facteurs</li>
+                            <li>Mettez à jour régulièrement vos logiciels</li>
+                            <li>Sauvegardez vos données importantes</li>
+                            <li>Méfiez-vous des emails suspects</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>Menaces courantes</h3>
+                        <ul>
+                            <li>Phishing et arnaques par email</li>
+                            <li>Malware et ransomwares</li>
+                            <li>Attaques par force brute</li>
+                            <li>Ingénierie sociale</li>
+                            <li>Vulnérabilités non corrigées</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <h3>Outils recommandés</h3>
+                        <ul>
+                            <li>Antivirus de qualité</li>
+                            <li>Firewall personnel</li>
+                            <li>Gestionnaire de mots de passe</li>
+                            <li>VPN pour la confidentialité</li>
+                            <li>Chiffrement des données sensibles</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3>Formation et ressources</h3>
+                        <ul>
+                            <li>Formations en ligne gratuites</li>
+                            <li>Certifications cybersécurité</li>
+                            <li>Communautés de pratique</li>
+                            <li>Webinaires et conférences</li>
+                            <li>Documentation technique</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Section -->
+        <section id="admin" class="section">
+            <div class="container">
+                <div id="admin-login" class="admin-login">
+                    <h1 class="section-title">
+                        <i class="fas fa-user-shield"></i>
+                        Connexion Administrateur
+                    </h1>
+                    
+                    <form id="login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="username">Nom d'utilisateur</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Mot de passe</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Se connecter
+                        </button>
+                    </form>
+                </div>
+
+                <div id="admin-dashboard" class="admin-dashboard" style="display: none;">
+                    <div class="dashboard-header">
+                        <h1 class="section-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Tableau de Bord Administrateur
+                        </h1>
+                        <button id="logout-btn" class="btn btn-secondary">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Déconnexion
+                        </button>
+                    </div>
+
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-responses">0</h3>
+                                <p>Réponses totales</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-countries">0</h3>
+                                <p>Pays représentés</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="avg-awareness">0</h3>
+                                <p>Niveau moyen de sensibilisation</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="total-incidents">0</h3>
+                                <p>Total d'incidents</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-charts">
+                        <div class="chart-container">
+                            <h3>Réponses par région</h3>
+                            <canvas id="region-chart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <h3>Solutions les plus utilisées</h3>
+                            <canvas id="solutions-chart"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Distribution du niveau de sensibilisation</h3>
+                            <canvas id="awareness-chart"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Besoins en formation</h3>
+                            <canvas id="training-chart"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Top 5 des pays</h3>
+                            <canvas id="countries-chart"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <h3>Distribution des incidents</h3>
+                            <canvas id="incidents-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-actions">
+                        <button id="export-csv" class="btn btn-primary">
+                            <i class="fas fa-download"></i>
+                            Exporter en CSV
+                        </button>
+                        <button id="export-json" class="btn btn-secondary">
+                            <i class="fas fa-file-code"></i>
+                            Exporter en JSON
+                        </button>
+                    </div>
+
+                    <div class="responses-table">
+                        <h3>Activité récente</h3>
+                        <div class="table-container">
+                            <table id="responses-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Heure</th>
+                                        <th>Pays</th>
+                                        <th>Région</th>
+                                        <th>Type d'organisation</th>
+                                        <th>Niveau de sensibilisation</th>
+                                        <th>Incidents</th>
+                                        <th>Solutions</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="responses-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CyberGuard 4 All</h3>
+                    <p>Renforcer la cybersécurité en Afrique</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liens rapides</h4>
+                    <ul>
+                        <li><a href="#home">Accueil</a></li>
+                        <li><a href="#survey">Enquête</a></li>
+                        <li><a href="#information">Informations</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>📧 cyberguard4all@gmail.com</p>
+                    <p>📞 +221 78 309 20 36</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 CyberGuard 4 All. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-check-circle"></i> Enquête soumise avec succès !</h2>
+            </div>
+            <div class="modal-body">
+                <p>Merci pour votre participation à notre enquête sur la cybersécurité en Afrique. 
+                Vos réponses nous aideront à mieux comprendre les défis et besoins en matière de sécurité numérique.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal()">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
