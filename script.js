@@ -35,7 +35,7 @@ class LocalDatabase {
     }
 
     getData() {
-        return JSON.parse(localStorage.getItem(this.storageKey));
+        return JSON.parse(localStorage.getItem(this.storageKey)) || { surveys: [], stats: {} };
     }
 
     saveData(data) {
@@ -56,9 +56,7 @@ class LocalDatabase {
         this.updateStats(data);
         this.saveData(data);
         
-        // Déclencher un événement pour mettre à jour le dashboard en temps réel
         window.dispatchEvent(new CustomEvent('surveyAdded', { detail: survey }));
-        
         return survey;
     }
 
@@ -68,7 +66,7 @@ class LocalDatabase {
             totalResponses: surveys.length,
             totalCountries: new Set(surveys.map(s => s.country)).size,
             avgAwareness: surveys.length > 0 ? 
-                (surveys.reduce((sum, s) => sum + parseInt(s.cybersecurityAwareness), 0) / surveys.length).toFixed(1) : 0,
+                (surveys.reduce((sum, s) => sum + parseInt(s.cybersecurityAwareness || 0), 0) / surveys.length).toFixed(1) : 0,
             regions: {},
             solutions: {},
             organizationTypes: {},
@@ -79,37 +77,26 @@ class LocalDatabase {
             recentActivity: []
         };
 
-        // Compter les régions
         surveys.forEach(survey => {
             stats.regions[survey.region] = (stats.regions[survey.region] || 0) + 1;
             stats.organizationTypes[survey.organizationType] = (stats.organizationTypes[survey.organizationType] || 0) + 1;
-            stats.incidents.push(parseInt(survey.incidentsLast12Months));
+            stats.incidents.push(parseInt(survey.incidentsLast12Months || 0));
             
-            // Distribution du niveau de sensibilisation
-            const awareness = survey.cybersecurityAwareness;
+            const awareness = survey.cybersecurityAwareness || '0';
             stats.awarenessDistribution[awareness] = (stats.awarenessDistribution[awareness] || 0) + 1;
-        });
-
-        // Compter les solutions
-        surveys.forEach(survey => {
+            
             if (Array.isArray(survey.solutionsUsed)) {
                 survey.solutionsUsed.forEach(solution => {
                     stats.solutions[solution] = (stats.solutions[solution] || 0) + 1;
                 });
             }
-        });
-
-        // Compter les besoins en formation
-        surveys.forEach(survey => {
+            
             if (Array.isArray(survey.trainingNeeds)) {
                 survey.trainingNeeds.forEach(need => {
                     stats.trainingNeeds[need] = (stats.trainingNeeds[need] || 0) + 1;
                 });
             }
-        });
-
-        // Compter les besoins en support
-        surveys.forEach(survey => {
+            
             if (Array.isArray(survey.supportNeeds)) {
                 survey.supportNeeds.forEach(need => {
                     stats.supportNeeds[need] = (stats.supportNeeds[need] || 0) + 1;
@@ -117,16 +104,16 @@ class LocalDatabase {
             }
         });
 
-        // Activité récente (dernières 10 réponses)
         stats.recentActivity = surveys.slice(-10).reverse().map(survey => ({
+            id: survey.id,
             date: survey.date,
             time: survey.time,
             country: survey.country,
             region: survey.region,
-            organizationType: survey.organizationType,
-            awareness: survey.cybersecurityAwareness,
-            incidents: survey.incidentsLast12Months,
-            solutionsUsed: survey.solutionsUsed
+            organizationType: survey.organizationType || 'N/A',
+            awareness: survey.cybersecurityAwareness || '0',
+            incidents: survey.incidentsLast12Months || '0',
+            solutionsUsed: survey.solutionsUsed || []
         }));
 
         data.stats = stats;
@@ -163,11 +150,11 @@ class LocalDatabase {
 
     getIncidentStats() {
         const surveys = this.getSurveys();
-        const incidents = surveys.map(s => parseInt(s.incidentsLast12Months));
+        const incidents = surveys.map(s => parseInt(s.incidentsLast12Months || 0));
         return {
             total: incidents.reduce((sum, inc) => sum + inc, 0),
             average: incidents.length > 0 ? (incidents.reduce((sum, inc) => sum + inc, 0) / incidents.length).toFixed(1) : 0,
-            max: Math.max(...incidents),
+            max: incidents.length > 0 ? Math.max(...incidents) : 0,
             distribution: incidents.reduce((acc, inc) => {
                 acc[inc] = (acc[inc] || 0) + 1;
                 return acc;
@@ -183,10 +170,7 @@ class LocalDatabase {
             data.surveys.splice(surveyIndex, 1);
             this.updateStats(data);
             this.saveData(data);
-            
-            // Déclencher un événement pour mettre à jour le dashboard en temps réel
             window.dispatchEvent(new CustomEvent('surveyDeleted', { detail: { surveyId } }));
-            
             return true;
         }
         return false;
@@ -197,10 +181,17 @@ class LocalDatabase {
         if (surveys.length === 0) return '';
 
         const headers = [
-            'Date', 'Heure', 'Région', 'Pays', 'Type d\'organisation', 'Taille d\'organisation',
+            'Date', 'Heure', 'Région', 'Pays', "Type d'organisation", "Taille d'organisation",
             'Niveau de sensibilisation', 'Solutions utilisées', 'Incidents (12 mois)',
             'Besoins en formation', 'Besoins en support', 'Commentaires'
         ];
+
+        const escapeCsvValue = (value) => {
+            if (typeof value === 'string') {
+                return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+        };
 
         const csvContent = [
             headers.join(','),
@@ -212,11 +203,11 @@ class LocalDatabase {
                 survey.organizationType,
                 survey.organizationSize,
                 survey.cybersecurityAwareness,
-                Array.isArray(survey.solutionsUsed) ? survey.solutionsUsed.join('; ') : survey.solutionsUsed,
+                Array.isArray(survey.solutionsUsed) ? escapeCsvValue(survey.solutionsUsed.join('; ')) : escapeCsvValue(survey.solutionsUsed || ''),
                 survey.incidentsLast12Months,
-                Array.isArray(survey.trainingNeeds) ? survey.trainingNeeds.join('; ') : survey.trainingNeeds,
-                Array.isArray(survey.supportNeeds) ? survey.supportNeeds.join('; ') : survey.supportNeeds,
-                survey.additionalComments || ''
+                Array.isArray(survey.trainingNeeds) ? escapeCsvValue(survey.trainingNeeds.join('; ')) : escapeCsvValue(survey.trainingNeeds || ''),
+                Array.isArray(survey.supportNeeds) ? escapeCsvValue(survey.supportNeeds.join('; ')) : escapeCsvValue(survey.supportNeeds || ''),
+                escapeCsvValue(survey.additionalComments || '')
             ].join(','))
         ].join('\n');
 
@@ -267,10 +258,6 @@ class AuthManager {
     }
 }
 
-// Initialisation des classes
-const db = new LocalDatabase();
-const auth = new AuthManager();
-
 // Gestionnaire de navigation
 class NavigationManager {
     constructor() {
@@ -279,12 +266,15 @@ class NavigationManager {
     }
 
     initNavigation() {
-        // Navigation par liens
-        document.querySelectorAll('.nav-link').forEach(link => {
+        // Navigation pour tous les liens (barre de navigation, hero, footer)
+        const navLinks = document.querySelectorAll('.nav-link, .hero-actions .btn, .footer-section a');
+        navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = e.target.getAttribute('href').substring(1);
-                this.navigateTo(target);
+                const target = link.getAttribute('href')?.substring(1);
+                if (target) {
+                    this.navigateTo(target);
+                }
             });
         });
 
@@ -292,38 +282,48 @@ class NavigationManager {
         const navToggle = document.getElementById('nav-toggle');
         const navMenu = document.getElementById('nav-menu');
         
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-
-        // Fermer le menu mobile quand on clique sur un lien
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navMenu.classList.remove('active');
+        if (navToggle && navMenu) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+                navToggle.classList.toggle('active');
             });
-        });
+
+            // Fermer le menu mobile quand on clique sur un lien
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                });
+            });
+        }
     }
 
     navigateTo(sectionId) {
+        const targetSection = document.getElementById(sectionId);
+        if (!targetSection) {
+            console.warn(`Section ${sectionId} not found`);
+            return;
+        }
+
         // Masquer toutes les sections
         document.querySelectorAll('.section').forEach(section => {
             section.classList.remove('active');
         });
 
         // Afficher la section cible
-        const targetSection = document.getElementById(sectionId);
-        if (targetSection) {
-            targetSection.classList.add('active');
-        }
+        targetSection.classList.add('active');
+        targetSection.scrollIntoView({ behavior: 'smooth' });
 
         // Mettre à jour la navigation active
         document.querySelectorAll('.nav-link').forEach(link => {
             link.classList.remove('active');
+            link.setAttribute('aria-current', 'false');
         });
 
-        const activeLink = document.querySelector(`[href="#${sectionId}"]`);
+        const activeLink = document.querySelector(`.nav-link[href="#${sectionId}"]`);
         if (activeLink) {
             activeLink.classList.add('active');
+            activeLink.setAttribute('aria-current', 'page');
         }
 
         this.currentSection = sectionId;
@@ -335,27 +335,29 @@ class NavigationManager {
     }
 
     handleAdminSection() {
+        const adminLogin = document.getElementById('admin-login');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        
         if (auth.isAuthenticated) {
-            document.getElementById('admin-login').style.display = 'none';
-            document.getElementById('admin-dashboard').style.display = 'block';
+            adminLogin.style.display = 'none';
+            adminDashboard.style.display = 'block';
             this.loadDashboard();
         } else {
-            document.getElementById('admin-login').style.display = 'block';
-            document.getElementById('admin-dashboard').style.display = 'none';
+            adminLogin.style.display = 'block';
+            adminDashboard.style.display = 'none';
         }
     }
 
     loadDashboard() {
         const stats = db.getStats();
-        const surveys = db.getSurveys();
         const incidentStats = db.getIncidentStats();
         const topCountries = db.getTopCountries();
 
         // Mettre à jour les statistiques
-        document.getElementById('total-responses').textContent = stats.totalResponses;
-        document.getElementById('total-countries').textContent = stats.totalCountries;
-        document.getElementById('avg-awareness').textContent = stats.avgAwareness;
-        document.getElementById('total-incidents').textContent = incidentStats.total;
+        document.getElementById('total-responses').textContent = stats.totalResponses || 0;
+        document.getElementById('total-countries').textContent = stats.totalCountries || 0;
+        document.getElementById('avg-awareness').textContent = stats.avgAwareness || 0;
+        document.getElementById('total-incidents').textContent = incidentStats.total || 0;
 
         // Mettre à jour le tableau des réponses
         this.updateResponsesTable(stats.recentActivity);
@@ -366,6 +368,8 @@ class NavigationManager {
 
     updateResponsesTable(recentActivity) {
         const tbody = document.getElementById('responses-tbody');
+        if (!tbody) return;
+        
         tbody.innerHTML = '';
 
         recentActivity.forEach((activity, index) => {
@@ -376,7 +380,7 @@ class NavigationManager {
                 <td>${activity.time}</td>
                 <td>${activity.country}</td>
                 <td>${activity.region}</td>
-                <td>${activity.organizationType || 'N/A'}</td>
+                <td>${activity.organizationType}</td>
                 <td>${activity.awareness}/5</td>
                 <td>${activity.incidents}</td>
                 <td>${this.getSolutionsSummary(activity.solutionsUsed)}</td>
@@ -387,7 +391,6 @@ class NavigationManager {
                 </td>
             `;
             
-            // Ajouter une animation pour les nouvelles réponses (première ligne)
             if (index === 0) {
                 row.classList.add('new-response');
             }
@@ -404,13 +407,9 @@ class NavigationManager {
 
     deleteActivity(surveyId) {
         if (confirm('Êtes-vous sûr de vouloir supprimer cette réponse ? Cette action est irréversible.')) {
-            // Trouver la ligne correspondante
             const row = document.querySelector(`tr[data-survey-id="${surveyId}"]`);
             if (row) {
-                // Ajouter l'animation de suppression
                 row.classList.add('deleting');
-                
-                // Attendre la fin de l'animation avant de supprimer
                 setTimeout(() => {
                     if (db.deleteSurvey(surveyId)) {
                         this.loadDashboard();
@@ -431,172 +430,140 @@ class NavigationManager {
         }
     }
 
-        createCharts(stats, incidentStats, topCountries) {
+    createCharts(stats, incidentStats, topCountries) {
         // Graphique des régions
-        const regionCtx = document.getElementById('region-chart').getContext('2d');
-        new Chart(regionCtx, {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(stats.regions),
-                datasets: [{
-                    data: Object.values(stats.regions),
-                    backgroundColor: [
-                        '#667eea', '#764ba2', '#f093fb', '#f5576c',
-                        '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
+        const regionCtx = document.getElementById('region-chart')?.getContext('2d');
+        if (regionCtx) {
+            new Chart(regionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(stats.regions),
+                    datasets: [{
+                        data: Object.values(stats.regions),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                            '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom' } }
                 }
-            }
-        });
+            });
+        }
 
         // Graphique des solutions
-        const solutionsCtx = document.getElementById('solutions-chart').getContext('2d');
-        new Chart(solutionsCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(stats.solutions),
-                datasets: [{
-                    label: 'Utilisations',
-                    data: Object.values(stats.solutions),
-                    backgroundColor: '#667eea',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        const solutionsCtx = document.getElementById('solutions-chart')?.getContext('2d');
+        if (solutionsCtx) {
+            new Chart(solutionsCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stats.solutions),
+                    datasets: [{
+                        label: 'Utilisations',
+                        data: Object.values(stats.solutions),
+                        backgroundColor: '#667eea',
+                        borderRadius: 6
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
+            });
+        }
 
         // Graphique de la distribution du niveau de sensibilisation
-        const awarenessCtx = document.getElementById('awareness-chart').getContext('2d');
-        new Chart(awarenessCtx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(stats.awarenessDistribution).map(level => `Niveau ${level}`),
-                datasets: [{
-                    label: 'Nombre de réponses',
-                    data: Object.values(stats.awarenessDistribution),
-                    backgroundColor: '#43e97b',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        const awarenessCtx = document.getElementById('awareness-chart')?.getContext('2d');
+        if (awarenessCtx) {
+            new Chart(awarenessCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stats.awarenessDistribution).map(level => `Niveau ${level}`),
+                    datasets: [{
+                        label: 'Nombre de réponses',
+                        data: Object.values(stats.awarenessDistribution),
+                        backgroundColor: '#43e97b',
+                        borderRadius: 6
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
+            });
+        }
 
         // Graphique des besoins en formation
-        const trainingCtx = document.getElementById('training-chart').getContext('2d');
-        new Chart(trainingCtx, {
-            type: 'horizontalBar',
-            data: {
-                labels: Object.keys(stats.trainingNeeds),
-                datasets: [{
-                    label: 'Demandes',
-                    data: Object.values(stats.trainingNeeds),
-                    backgroundColor: '#f093fb',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        const trainingCtx = document.getElementById('training-chart')?.getContext('2d');
+        if (trainingCtx) {
+            new Chart(trainingCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stats.trainingNeeds),
+                    datasets: [{
+                        label: 'Demandes',
+                        data: Object.values(stats.trainingNeeds),
+                        backgroundColor: '#f093fb',
+                        borderRadius: 6
+                    }]
                 },
-                scales: {
-                    x: {
-                        beginAtZero: true
-                    }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
+            });
+        }
 
         // Graphique des top pays
-        const countriesCtx = document.getElementById('countries-chart').getContext('2d');
-        new Chart(countriesCtx, {
-            type: 'bar',
-            data: {
-                labels: topCountries.map(item => item.country),
-                datasets: [{
-                    label: 'Réponses',
-                    data: topCountries.map(item => item.count),
-                    backgroundColor: '#4facfe',
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        const countriesCtx = document.getElementById('countries-chart')?.getContext('2d');
+        if (countriesCtx) {
+            new Chart(countriesCtx, {
+                type: 'bar',
+                data: {
+                    labels: topCountries.map(item => item.country),
+                    datasets: [{
+                        label: 'Réponses',
+                        data: topCountries.map(item => item.count),
+                        backgroundColor: '#4facfe',
+                        borderRadius: 6
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
+            });
+        }
 
         // Graphique de la distribution des incidents
-        const incidentsCtx = document.getElementById('incidents-chart').getContext('2d');
-        new Chart(incidentsCtx, {
-            type: 'line',
-            data: {
-                labels: Object.keys(incidentStats.distribution),
-                datasets: [{
-                    label: 'Nombre d\'organisations',
-                    data: Object.values(incidentStats.distribution),
-                    borderColor: '#f5576c',
-                    backgroundColor: 'rgba(245, 87, 108, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
+        const incidentsCtx = document.getElementById('incidents-chart')?.getContext('2d');
+        if (incidentsCtx) {
+            new Chart(incidentsCtx, {
+                type: 'line',
+                data: {
+                    labels: Object.keys(incidentStats.distribution),
+                    datasets: [{
+                        label: "Nombre d'organisations",
+                        data: Object.values(incidentStats.distribution),
+                        borderColor: '#f5576c',
+                        backgroundColor: 'rgba(245, 87, 108, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
                 }
-            }
-        });
+            });
+        }
     }
 }
 
@@ -614,21 +581,19 @@ class SurveyManager {
         const prevBtn = document.getElementById('prev-btn');
         const submitBtn = document.getElementById('submit-btn');
 
-        nextBtn.addEventListener('click', () => this.nextStep());
-        prevBtn.addEventListener('click', () => this.prevStep());
-        form.addEventListener('submit', (e) => this.handleSubmit(e));
-
-        // Validation en temps réel
-        this.setupValidation();
+        if (form && nextBtn && prevBtn && submitBtn) {
+            nextBtn.addEventListener('click', () => this.nextStep());
+            prevBtn.addEventListener('click', () => this.prevStep());
+            form.addEventListener('submit', (e) => this.handleSubmit(e));
+            this.setupValidation();
+        }
     }
 
     setupValidation() {
-        // Validation des champs requis
         document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
             field.addEventListener('blur', () => this.validateField(field));
         });
 
-        // Validation des checkboxes
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', () => this.validateCheckboxGroup(checkbox));
         });
@@ -645,12 +610,7 @@ class SurveyManager {
         const checkboxes = document.querySelectorAll(`input[name="${name}"]`);
         const checkedBoxes = document.querySelectorAll(`input[name="${name}"]:checked`);
         
-        if (checkedBoxes.length === 0) {
-            checkboxes.forEach(cb => cb.classList.add('error'));
-        } else {
-            checkboxes.forEach(cb => cb.classList.remove('error'));
-        }
-        
+        checkboxes.forEach(cb => cb.classList.toggle('error', checkedBoxes.length === 0));
         return checkedBoxes.length > 0;
     }
 
@@ -660,6 +620,8 @@ class SurveyManager {
                 this.currentStep++;
                 this.updateStepDisplay();
             }
+        } else {
+            alert('Veuillez remplir tous les champs requis avant de continuer.');
         }
     }
 
@@ -672,8 +634,9 @@ class SurveyManager {
 
     validateCurrentStep() {
         const currentStepElement = document.querySelector(`[data-step="${this.currentStep}"]`);
+        if (!currentStepElement) return false;
+
         const requiredFields = currentStepElement.querySelectorAll('input[required], select[required], textarea[required]');
-        
         let isValid = true;
         requiredFields.forEach(field => {
             if (!this.validateField(field)) {
@@ -681,7 +644,6 @@ class SurveyManager {
             }
         });
 
-        // Validation spéciale pour les checkboxes
         const checkboxGroups = currentStepElement.querySelectorAll('input[type="checkbox"]');
         const checkboxNames = [...new Set(Array.from(checkboxGroups).map(cb => cb.name))];
         
@@ -695,11 +657,9 @@ class SurveyManager {
     }
 
     updateStepDisplay() {
-        // Mettre à jour les étapes du progress bar
         document.querySelectorAll('.progress-step').forEach((step, index) => {
             const stepNumber = index + 1;
             step.classList.remove('active', 'completed');
-            
             if (stepNumber === this.currentStep) {
                 step.classList.add('active');
             } else if (stepNumber < this.currentStep) {
@@ -707,13 +667,11 @@ class SurveyManager {
             }
         });
 
-        // Afficher/masquer les étapes du formulaire
         document.querySelectorAll('.form-step').forEach((step, index) => {
             const stepNumber = index + 1;
             step.classList.toggle('active', stepNumber === this.currentStep);
         });
 
-        // Mettre à jour les boutons
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
         const submitBtn = document.getElementById('submit-btn');
@@ -734,7 +692,6 @@ class SurveyManager {
         const formData = new FormData(e.target);
         const surveyData = {};
 
-        // Récupérer les données du formulaire
         for (let [key, value] of formData.entries()) {
             if (surveyData[key]) {
                 if (Array.isArray(surveyData[key])) {
@@ -747,32 +704,24 @@ class SurveyManager {
             }
         }
 
-        // Traitement des checkboxes
         document.querySelectorAll('input[type="checkbox"]:checked').forEach(checkbox => {
             const name = checkbox.name;
-            if (surveyData[name]) {
-                if (Array.isArray(surveyData[name])) {
-                    surveyData[name].push(checkbox.value);
-                } else {
-                    surveyData[name] = [surveyData[name], checkbox.value];
-                }
-            } else {
-                surveyData[name] = checkbox.value;
+            if (!surveyData[name]) {
+                surveyData[name] = [];
             }
+            if (!Array.isArray(surveyData[name])) {
+                surveyData[name] = [surveyData[name]];
+            }
+            surveyData[name].push(checkbox.value);
         });
 
         try {
-            // Sauvegarder dans la base de données locale
             db.addSurvey(surveyData);
-            
-            // Afficher le modal de succès
             this.showSuccessModal();
-            
-            // Réinitialiser le formulaire
             e.target.reset();
             this.currentStep = 1;
             this.updateStepDisplay();
-            
+            navigation.navigateTo('home'); // Retour à l'accueil après soumission
         } catch (error) {
             console.error('Erreur lors de la soumission:', error);
             alert('Une erreur est survenue lors de la soumission. Veuillez réessayer.');
@@ -781,7 +730,9 @@ class SurveyManager {
 
     showSuccessModal() {
         const modal = document.getElementById('success-modal');
-        modal.style.display = 'block';
+        if (modal) {
+            modal.style.display = 'block';
+        }
     }
 }
 
@@ -792,30 +743,35 @@ class AdminManager {
     }
 
     initAdmin() {
-        // Gestion de la connexion
         const loginForm = document.getElementById('login-form');
-        loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+        }
 
-        // Gestion de la déconnexion
         const logoutBtn = document.getElementById('logout-btn');
-        logoutBtn.addEventListener('click', () => this.handleLogout());
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
 
-        // Gestion des exports
-        document.getElementById('export-csv').addEventListener('click', () => this.exportCSV());
-        document.getElementById('export-json').addEventListener('click', () => this.exportJSON());
+        const exportCsvBtn = document.getElementById('export-csv');
+        const exportJsonBtn = document.getElementById('export-json');
+        if (exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', () => this.exportCSV());
+        }
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener('click', () => this.exportJSON());
+        }
 
-        // Écouter les nouvelles soumissions d'enquête pour mettre à jour le dashboard en temps réel
-        window.addEventListener('surveyAdded', (e) => {
+        window.addEventListener('surveyAdded', () => {
             if (auth.isAuthenticated) {
-                this.loadDashboard();
+                navigation.loadDashboard();
                 this.showNotification('Nouvelle réponse reçue !');
             }
         });
 
-        // Écouter les suppressions d'enquête pour mettre à jour le dashboard en temps réel
-        window.addEventListener('surveyDeleted', (e) => {
+        window.addEventListener('surveyDeleted', () => {
             if (auth.isAuthenticated) {
-                this.loadDashboard();
+                navigation.loadDashboard();
             }
         });
     }
@@ -830,8 +786,6 @@ class AdminManager {
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('admin-dashboard').style.display = 'block';
             navigation.loadDashboard();
-            
-            // Afficher un message de bienvenue
             this.showNotification('Connexion réussie ! Dashboard mis à jour.');
         } else {
             alert('Identifiants incorrects. Veuillez réessayer.');
@@ -843,12 +797,14 @@ class AdminManager {
         document.getElementById('admin-login').style.display = 'block';
         document.getElementById('admin-dashboard').style.display = 'none';
         document.getElementById('login-form').reset();
+        navigation.navigateTo('home');
     }
 
     exportCSV() {
         const csvContent = db.exportToCSV();
         if (csvContent) {
             this.downloadFile(csvContent, 'cyberguard4all_surveys.csv', 'text/csv');
+            this.showNotification('Données exportées en CSV avec succès !');
         } else {
             alert('Aucune donnée à exporter.');
         }
@@ -857,6 +813,7 @@ class AdminManager {
     exportJSON() {
         const jsonContent = db.exportToJSON();
         this.downloadFile(jsonContent, 'cyberguard4all_surveys.json', 'application/json');
+        this.showNotification('Données exportées en JSON avec succès !');
     }
 
     downloadFile(content, filename, mimeType) {
@@ -872,7 +829,6 @@ class AdminManager {
     }
 
     showNotification(message) {
-        // Créer une notification temporaire
         const notification = document.createElement('div');
         notification.className = 'admin-notification';
         notification.innerHTML = `
@@ -881,11 +837,7 @@ class AdminManager {
         `;
         
         document.body.appendChild(notification);
-        
-        // Animer l'apparition
         setTimeout(() => notification.classList.add('show'), 100);
-        
-        // Supprimer après 3 secondes
         setTimeout(() => {
             notification.classList.remove('show');
             setTimeout(() => document.body.removeChild(notification), 300);
@@ -895,34 +847,39 @@ class AdminManager {
 
 // Fonctions utilitaires
 function closeModal() {
-    document.getElementById('success-modal').style.display = 'none';
+    const modal = document.getElementById('success-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        navigation.navigateTo('home'); // Rediriger vers home après fermeture
+    }
 }
 
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialiser les gestionnaires
+    window.db = new LocalDatabase();
+    window.auth = new AuthManager();
     window.navigation = new NavigationManager();
     window.survey = new SurveyManager();
     window.admin = new AdminManager();
 
-    // Gestion du modal
     window.closeModal = closeModal;
 
-    // Fermer le modal en cliquant à l'extérieur
-    document.getElementById('success-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'success-modal') {
-            closeModal();
-        }
-    });
+    const successModal = document.getElementById('success-modal');
+    if (successModal) {
+        successModal.addEventListener('click', (e) => {
+            if (e.target.id === 'success-modal') {
+                closeModal();
+            }
+        });
+    }
 
-    // Navigation par défaut vers la page d'accueil
     navigation.navigateTo('home');
 
-    // Ajouter quelques données d'exemple pour la démonstration
+    // Données d'exemple pour la démonstration
     if (db.getSurveys().length === 0) {
         const sampleData = [
             {
-                region: 'Afrique de l\'Ouest',
+                region: "Afrique de l'Ouest",
                 country: 'Sénégal',
                 organizationType: 'Entreprise',
                 organizationSize: '11-50',
@@ -946,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 additionalComments: 'Budget limité pour la cybersécurité'
             },
             {
-                region: 'Afrique de l\'Est',
+                region: "Afrique de l'Est",
                 country: 'Kenya',
                 organizationType: 'École',
                 organizationSize: '51-200',
